@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Waktu Solat</title>
+    <link rel="shortcut icon" type="image/png" href="icon.png"/>
+    <style>
+        body {
+            margin: 0;
+            font: 10pt monospace;
+            overflow-x: hidden;
+        }
+        section {
+            margin-top: 40px;
+        }
+        div {
+            width: 100%;
+            height: 24px;
+            border-top: 1px solid lightgray;
+        }
+        .indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-top-color: #870e54;
+        }
+        #currenttime {
+            z-index: 70;
+        }
+        .s {
+            border-top-color: #444;
+            text-align: center;
+        }
+        div span {
+            color: lightgray;
+            position: relative;
+            top: -9px;
+            left: calc(100% - 57px);
+            padding: 10px;
+            background: white;
+        }
+        .display {
+            left: calc(100% - 69px);
+            padding: 5px;
+            color: white;
+            background: #870e54;
+        }
+        .waktusolat {
+            left: initial;
+            background: #444;
+        }
+        #location {
+            border-top-style: none;
+            position: fixed;
+            top: 0;
+            text-align: center;
+            padding: 5px;
+            color: lightgray;
+            background: rgba(255, 255, 255, 0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 90;
+        }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 85;
+            padding: 10%;
+        }
+        #locationlist {
+            border-top: none;
+            overflow: auto;
+            width: 80%;
+            height: 80%;
+        }
+        ul {
+            padding: 0;
+        }
+        li {
+            border-top: 1px solid lightgray;
+            /*padding: 5px 0;*/
+            list-style: none;
+        }
+        li:last-child {
+            border-bottom: 1px solid lightgray;
+        }
+        footer {
+            color: #444;
+            background: lightgray;
+            padding: 10px;
+        }
+        a {
+            color: #444;
+            text-decoration: none;
+        }
+        li:hover {
+            background: #444;
+            color: white;
+        }
+        li a {
+            display: block;
+            padding: 5px 0;
+        }
+        li a:hover {
+            color: white;
+        }
+        footer a {
+            text-decoration: underline;
+        }
+
+        /* CSS throbber adapted from @tobiasahlin */
+        .spinner {
+            position: fixed;
+            top: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            border-top-style: none;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 100;
+        }
+
+        .spinner > div {
+            width: 18px;
+            height: 18px;
+            background-color: #444;
+
+            margin: 5px;
+            border-radius: 100%;
+            display: inline-block;
+            animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+        }
+
+        .spinner .bounce1 {
+            animation-delay: -0.32s;
+        }
+
+        .spinner .bounce2 {
+            animation-delay: -0.16s;
+        }
+
+        @keyframes sk-bouncedelay {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+    </div>
+    <div id="location"></div>
+    <div id="overlay">
+        <div id="locationlist">
+            <h2>Kedah</h2>
+            <ul>
+                <li><a href="?zon=KDH01">Kota Setar, Kubang Pasu, Pokok Sena</a></li>
+                <li><a href="?zon=KDH02">Pendang, Kuala Muda, Yan</a></li>
+                <li><a href="?zon=KDH03">Padang Terap, Sik</a></li>
+                <li><a href="?zon=KDH04">Baling</a></li>
+                <li><a href="?zon=KDH05">Kulim, Bandar Bahru</a></li>
+                <li><a href="?zon=KDH06">Langkawi</a></li>
+                <li><a href="?zon=KDH07">Gunung Jerai</a></li>
+            </ul>
+
+            <h2>Pulau Pinang</h2>
+            <ul>
+                <li><a href="?zon=PNG01">Seluruh negeri Pulau Pinang</a></li>
+            </ul>
+
+            <h2>Perak</h2>
+            <ul>
+                <li><a href="?zon=PRK01">Tapah,Slim River dan Tanjung Malim</a></li>
+                <li><a href="?zon=PRK02">Ipoh, Batu Gajah, Kampar, Sg. Siput dan Kuala Kangsar</a></li>
+                <li><a href="?zon=PRK03">Pengkalan Hulu, Grik dan Lenggong</a></li>
+                <li><a href="?zon=PRK04">Temengor dan Belum</a></li>
+                <li><a href="?zon=PRK05">Teluk Intan, Bagan Datoh, Kg.Gajah,Sri Iskandar, Beruas,Parit,Lumut,Setiawan dan Pulau Pangkor</a></li>
+                <li><a href="?zon=PRK06">Selama, Taiping, Bagan Serai dan Parit Buntar</a></li>
+                <li><a href="?zon=PRK07">Bukit Larut</a></li>
+            </ul>
+
+            <h2>Selangor</h2>
+            <ul>
+                <li><a href="?zon=SGR01">Gombak,H.Selangor,Rawang, H.Langat,Sepang,Petaling, S.Alam</a></li>
+                <li><a href="?zon=SGR02">Sabak Bernam, Kuala Selangor, Klang, Kuala Langat</a></li>
+            </ul>
+
+            <h2>Wilayah Persekutuan</h2>
+            <ul>
+                <li><a href="?zon=SGR03">Kuala Lumpur</a></li>
+                <li><a href="?zon=SGR04">Putrajaya</a></li>
+                <li><a href="?zon=WLY02">Labuan</a></li>
+            </ul>
+
+            <h2>Negeri Sembilan</h2>
+            <ul>
+                <li><a href="?zon=NGS01">Jempol, Tampin</a></li>
+                <li><a href="?zon=NGS02">Port Dickson, Seremban, Kuala Pilah, Jelebu, Rembau</a></li>
+            </ul>
+
+            <h2>Melaka</h2>
+            <ul>
+                <li><a href="?zon=MLK01">Bandar Melaka, Alor Gajah, Jasin, Masjid Tanah, Merlimau, Nyalas</a></li>
+            </ul>
+
+            <h2>Johor</h2>
+            <ul>
+                <li><a href="?zon=JHR01">Pulau Aur dan Pemanggil</a></li>
+                <li><a href="?zon=JHR02">Kota Tinggi, Mersing, Johor Bahru</a></li>
+                <li><a href="?zon=JHR03">Kluang dan Pontian</a></li>
+                <li><a href="?zon=JHR04">Batu Pahat, Muar, Segamat, Gemas</a></li>
+            </ul>
+
+            <h2>Perlis</h2>
+            <ul>
+                <li><a href="?zon=PLS01">Kangar, Padang Besar, Arau</a></li>
+            </ul>
+
+            <h2>Pahang</h2>
+            <ul>
+                <li><a href="?zon=PHG01">Pulau Tioman</a></li>
+                <li><a href="?zon=PHG02">Kuantan, Pekan, Rompin, Muadzam Shah</a></li>
+                <li><a href="?zon=PHG03">Maran, Chenor, Temerloh, Bera, Jerantut</a></li>
+                <li><a href="?zon=PHG04">Bentong, Raub, Kuala Lipis</a></li>
+                <li><a href="?zon=PHG05">Genting Sempah, Janda Baik, Bukit Tinggi</a></li>
+                <li><a href="?zon=PHG06">Bukit Fraser, Genting Higlands, Cameron Higlands</a></li>
+            </ul>
+
+            <h2>Kelantan</h2>
+            <ul>
+                <li><a href="?zon=KTN01">K.Bharu,Bachok,Pasir Puteh,Tumpat,Pasir Mas,Tnh. Merah,Machang,Kuala Krai,Mukim Chiku</a></li>
+                <li><a href="?zon=KTN03">Jeli, Gua Musang (Mukim Galas, Bertam)</a></li>
+            </ul>
+
+            <h2>Terengganu</h2>
+            <ul>
+                <li><a href="?zon=TRG01">Kuala Terengganu, Marang</a></li>
+                <li><a href="?zon=TRG01">Besut, Setiu</a></li>
+                <li><a href="?zon=TRG01">Hulu Terengganu</a></li>
+                <li><a href="?zon=TRG01">Kemaman, Dungun</a></li>
+            </ul>
+
+            <h2>Sabah</h2>
+            <ul>
+                <li><a href="?zon=SBH01">Zon 1 - Sandakan, Bdr. Bkt. Garam, Semawang, Temanggong, Tambisan</a></li>
+                <li><a href="?zon=SBH02">Zon 2 - Pinangah, Terusan, Beluran, Kuamut, Telupit</a></li>
+                <li><a href="?zon=TRG03">Zon 3 - Lahad Datu, Kunak, Silabukan, Tungku, Sahabat, Semporna</a></li>
+                <li><a href="?zon=TRG04">Zon 4 - Tawau, Balong, Merotai, Kalabakan</a></li>
+                <li><a href="?zon=TRG05">Zon 5 - Kudat, Kota Marudu, Pitas, Pulau Banggi</a></li>
+                <li><a href="?zon=TRG06">Zon 6 - Gunung Kinabalu</a></li>
+                <li><a href="?zon=TRG07">Zon 7 - Papar, Ranau, Kota Belud, Tuaran, Penampang, Kota Kinabalu</a></li>
+                <li><a href="?zon=TRG08">Zon 8 - Pensiangan, Keningau, Tambunan, Nabawan</a></li>
+                <li><a href="?zon=TRG09">Zon 9 - Sipitang, Membakut, Beaufort, Kuala Penyu, Weston, Tenom, Long Pa Sia</a></li>
+            </ul>
+
+            <h2>Sarawak</h2>
+            <ul>
+                <li><a href="?zon=SWK01">Zon 1 - Limbang, Sundar, Trusan, Lawas</a></li>
+                <li><a href="?zon=SWK02">Zon 2 - Niah, Bekenu, Miri, Sibuti, Marudi</a></li>
+                <li><a href="?zon=SWK03">Zon 3 - Tatau, Suai, Belaga, Pandan, Sebauh, Bintulu</a></li>
+                <li><a href="?zon=SWK04">Zon 4 - Igan, Oya, Balingian, Mukah, Dalat, Sibu, Kanowit, Kapit, Song</a></li>
+                <li><a href="?zon=SWK05">Zon 5 - Tanjung Manis, Belawai, Matu, Daro, Sarikei, Julau, Bintangor, Rajang</a></li>
+                <li><a href="?zon=SWK06">Zon 6 - Kabong, Lingga, Sri Aman, Engkelili, Lubok Antu, Betong, Spaoh, Pusa, Saratok, Roban, Debak</a></li>
+                <li><a href="?zon=SWK07">Zon 7 - Samarahan, Simunjan, Serian, Sebuyau, Meludam</a></li>
+                <li><a href="?zon=SWK08">Zon 8 - Kuching, Bau, Lundu,Sematan</a></li>
+                <li><a href="?zon=SWK09">Zon 9 - Zon Khas</a></li>
+            </ul>
+        </div>
+    </div>
+    <section id="timeline"></section>
+    <div class="indicator" id="currenttime">
+        <span class="display"></span>
+    </div>
+    <footer>
+        <span id="updateinfo"></span>
+        <p><a href="https://github.com/akmalirfan">GitHub</a></p>
+        </footer>
+    
+    <!--<div class="s indicator" id="Cuba">
+        <span class="display waktusolat"></span>
+    </div>-->
+
+    <script>
+        let xhr = new XMLHttpRequest()
+
+        xhr.open('GET', `waktusolat.php${window.location.search}`)
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let oParser = new DOMParser()
+                generateIndicators(oParser.parseFromString(xhr.responseText, 'text/xml'))
+            }
+        }
+
+        if (window.location.search) {
+            xhr.send()
+        } else {
+            document.body.style.overflow = 'hidden'
+            document.getElementsByClassName('spinner')[0].style.display = 'none'
+        }
+
+        const generateIndicators = (data) => {
+            let table = document.createElement('table')
+            let esolatdate = data.documentElement.children[0].children[6].innerHTML
+            let waktusolat = data.documentElement.children[0].getElementsByTagName('item')
+            let location = data.documentElement.children[0].children[1].innerHTML
+            let timeline = document.getElementById('timeline')
+
+            document.getElementById('location').innerText = location
+            document.getElementById('updateinfo').innerText = `Dikemas kini: ${esolatdate}`
+            // let timediff = Date.now() - Date.parse(esolatdate)
+            // offsetIndicator(new Date(Date.now() - timediff), currenttime, true)
+            offsetIndicator(new Date(), currenttime, true)
+            window.scrollTo(0, offset + 40 - window.innerHeight / 2)
+
+            for (waktu of waktusolat) {
+                let name = waktu.children[0].innerHTML
+                let value = waktu.children[1].innerHTML
+                let indicator = document.createElement('div')
+                let display = document.createElement('span')
+                let solattime = `23 Oct 1994 ${value}:00`
+
+                indicator.className = 's indicator'
+                indicator.id = name
+                display.className = 'display waktusolat'
+                display.innerText = value
+
+                indicator.appendChild(display)
+                offsetIndicator(new Date(solattime), indicator)
+                timeline.appendChild(indicator)
+            }
+
+            window.setInterval(() => {
+                // offsetIndicator(new Date(Date.now() - timediff), currenttime, true)
+                offsetIndicator(new Date(), currenttime, true)
+            }, 1000);
+
+            document.getElementById('overlay').style.display = 'none'
+            document.getElementsByClassName('spinner')[0].style.display = 'none'
+        }
+
+        let currenttime = document.getElementById('currenttime')
+
+        for (let i = 0; i < 24; i++) {
+            let dv = document.createElement('div')
+            let senggat = document.createElement('div')
+            let senggatpendek1 = document.createElement('div')
+            let senggatpendek2 = document.createElement('div')
+            let sp = document.createElement('span')
+
+            sp.innerText = `${i > 9 ? '' : 0}${i}:00`
+            dv.appendChild(sp)
+            senggat.style.width = '30px'
+            senggatpendek1.style.width = '15px'
+            senggatpendek2.style.width = '15px'
+            timeline.appendChild(dv)
+            timeline.appendChild(senggatpendek1)
+            timeline.appendChild(senggat)
+            timeline.appendChild(senggatpendek2)
+        }
+
+        let offset = 0
+        const offsetIndicator = (time, indicator, includesec) => {
+            let sec = time.getSeconds() + time.getMinutes() * 60 + time.getHours() * 60 * 60
+            offset = Math.floor(sec / 86400 * 2400)
+            indicator.style.top = `${offset + 40}px`
+            let timestring = `${time}`.substr(16, includesec ? 8 : 5)
+            indicator.children[0].innerText = `${includesec ? '' : `${indicator.id} `}${timestring}`
+        }
+
+        document.getElementById('location').addEventListener('click', () => {
+            let overlay = document.getElementById('overlay')
+            overlay.style.display = overlay.style.display ? '' : 'none'
+            document.body.style.overflow = overlay.style.display ? '' : 'hidden'
+        })
+
+        // Untuk cuba
+        // offsetIndicator(new Date('07-07-2017 22:00:00'), document.getElementById('Cuba'))
+    </script>
+</body>
+</html>
