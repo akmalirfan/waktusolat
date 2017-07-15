@@ -4,7 +4,7 @@ xhr.open('GET', `waktusolat.php${window.location.search}`)
 xhr.onreadystatechange = () => {
     if (xhr.readyState === 4 && xhr.status === 200) {
         let oParser = new DOMParser()
-        generateIndicators(oParser.parseFromString(xhr.responseText, 'text/xml'))
+        generateIndicators(JSON.parse(xhr.responseText))
     }
 }
 
@@ -17,9 +17,9 @@ if (window.location.search) {
 
 const generateIndicators = (data) => {
     let table = document.createElement('table')
-    let esolatdate = data.documentElement.children[0].children[6].innerHTML
-    let waktusolat = data.documentElement.children[0].getElementsByTagName('item')
-    let location = data.documentElement.children[0].children[1].innerHTML
+    let esolatdate = data.masa
+    let waktusolat = data.waktusolat
+    let location = data.tempat
     let timeline = document.getElementById('timeline')
 
     document.getElementById('location').innerText = location
@@ -29,15 +29,14 @@ const generateIndicators = (data) => {
     offsetIndicator(new Date(), currenttime, true)
     window.scrollTo(0, offset + 40 - window.innerHeight / 2)
 
-    for (waktu of waktusolat) {
-        let name = waktu.children[0].innerHTML
-        let value = waktu.children[1].innerHTML
+    for (let waktu in waktusolat) {
+        let value = waktusolat[waktu]
         let indicator = document.createElement('div')
         let display = document.createElement('span')
         let solattime = `23 Oct 1994 ${value}:00`
 
         indicator.className = 's indicator'
-        indicator.id = name
+        indicator.id = waktu
         display.className = 'display waktusolat'
         display.innerText = value
 
