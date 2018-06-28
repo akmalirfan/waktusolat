@@ -14,10 +14,17 @@ foreach ($xml->channel->item as $item) {
     $waktusolat[(string) $item->title] = (string) $item->description;
 }
 
+$xml2 = simplexml_load_file('http://hijrah.mfrapps.com/api/hijrah-api.php');
+$hday = (string) $xml2->hijrah->day;
+$hmonth = ucfirst(strtolower($xml2->hijrah->month));
+$hyear = (string) $xml2->hijrah->year;
+$tarikhhijrah = join(' ', array($hday, $hmonth, $hyear));
+
 echo json_encode(
     array(
         "masa" => $masa,
         "tempat" => $tempat,
-        "waktusolat" => $waktusolat
+        "waktusolat" => $waktusolat,
+        "tarikhhijrah" => $tarikhhijrah
     )
 );
