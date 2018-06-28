@@ -15,10 +15,36 @@ if (window.location.search) {
     document.getElementsByClassName('spinner')[0].style.display = 'none'
 }
 
+const sanitizeWaktuSolat = waktusolat => {
+    let ws = {}
+    let matches = []
+    let prevTime
+    let date1
+    let date2
+
+    for (let waktu in waktusolat) {
+        matches = waktusolat[waktu].match(/(\w+)\W(\w+)/)
+        ws[waktu] = `${matches[1]}:${matches[2]}`
+
+        if (prevTime) {
+            date1 = new Date(`23 Oct 1994 ${ws[prevTime]}:00`)
+            date2 = new Date(`23 Oct 1994 ${ws[waktu]}:00`)
+
+            if (date1 > date2) {
+                ws[waktu] = `${Number(matches[1]) + 12}:${matches[2]}`
+            }
+        }
+
+        prevTime = waktu
+    }
+
+    return ws
+}
+
 const generateIndicators = (data) => {
     let table = document.createElement('table')
     let esolatdate = data.masa
-    let waktusolat = data.waktusolat
+    let waktusolat = sanitizeWaktuSolat(data.waktusolat)
     let location = data.tempat
     let timeline = document.getElementById('timeline')
 
