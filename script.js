@@ -24,6 +24,7 @@ const generateIndicators = (data) => {
 
     document.getElementById('location').innerText = location
     document.getElementById('updateinfo').innerText = `Dikemas kini: ${esolatdate}`
+    document.getElementById('tarikhhijrah').innerText = data.tarikhhijrah
     // let timediff = Date.now() - Date.parse(esolatdate)
     // offsetIndicator(new Date(Date.now() - timediff), currenttime, true)
     offsetIndicator(new Date(), currenttime, true)
