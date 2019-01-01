@@ -5,26 +5,21 @@ header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-$xml = simplexml_load_file('http://www2.e-solat.gov.my/xml/today/?'.$_SERVER['QUERY_STRING']);
-$masa = (string) $xml->channel->children('http://purl.org/dc/elements/1.1/')->date;
-$tempat = (string) $xml->channel->link;
-$waktusolat = array();
-
-foreach ($xml->channel->item as $item) {
-    $waktusolat[(string) $item->title] = (string) $item->description;
-}
-
-$xml2 = simplexml_load_file('http://hijrah.mfrapps.com/api/hijrah-api.php');
-$hday = (string) $xml2->hijrah->day;
-$hmonth = ucfirst(strtolower($xml2->hijrah->month));
-$hyear = (string) $xml2->hijrah->year;
-$tarikhhijrah = join(' ', array($hday, $hmonth, $hyear));
+$string = file_get_contents('https://www.e-solat.gov.my/index.php?r=esolatApi/TakwimSolat&period=today&'.$_SERVER['QUERY_STRING']);
+$json = json_decode($string, true);
 
 echo json_encode(
     array(
-        "masa" => $masa,
-        "tempat" => $tempat,
-        "waktusolat" => $waktusolat,
-        "tarikhhijrah" => $tarikhhijrah
+        "masa" => $json['serverTime'],
+        "tempat" => $json['zone'],
+        "waktusolat" => array(
+            "Subuh" => $json['prayerTime'][0]['fajr'],
+            "Syuruk" => $json['prayerTime'][0]['syuruk'],
+            "Zuhur" => $json['prayerTime'][0]['dhuhr'],
+            "Asar" => $json['prayerTime'][0]['asr'],
+            "Maghrib" => $json['prayerTime'][0]['maghrib'],
+            "Isyak" => $json['prayerTime'][0]['isha']
+        ),
+        "tarikhhijrah" => $json['prayerTime'][0]['hijri']
     )
 );
