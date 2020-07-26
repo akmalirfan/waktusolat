@@ -1,21 +1,4 @@
-let xhr = new XMLHttpRequest()
-
-xhr.open('GET', `waktusolat.php${window.location.search}`)
-xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-        let oParser = new DOMParser()
-        generateIndicators(JSON.parse(xhr.responseText))
-    }
-}
-
-if (window.location.search) {
-    xhr.send()
-} else {
-    document.body.style.overflow = 'hidden'
-    document.getElementsByClassName('spinner')[0].style.display = 'none'
-}
-
-const sanitizeWaktuSolat = waktusolat => {
+const sanitizeWaktuSolat = (waktusolat) => {
     let ws = {}
     let matches = []
     let prevTime
@@ -42,29 +25,34 @@ const sanitizeWaktuSolat = waktusolat => {
 }
 
 const generateIndicators = (data) => {
-    let table = document.createElement('table')
-    let esolatdate = data.masa
-    let waktusolat = sanitizeWaktuSolat(data.waktusolat)
-    let location = data.tempat
-    let timeline = document.getElementById('timeline')
+    let waktusolat = {
+        Subuh: data.prayerTime[0].fajr,
+        Syuruk: data.prayerTime[0].syuruk,
+        Zuhur: data.prayerTime[0].dhuhr,
+        Asar: data.prayerTime[0].asr,
+        Maghrib: data.prayerTime[0].maghrib,
+        Isyak: data.prayerTime[0].isha,
+    }
+    waktusolat = sanitizeWaktuSolat(waktusolat)
+    let timeline = document.getElementById("timeline")
 
-    document.getElementById('location').innerText = location
-    document.getElementById('updateinfo').innerText = `Dikemas kini: ${esolatdate}`
-    document.getElementById('tarikhhijrah').innerText = data.tarikhhijrah
-    // let timediff = Date.now() - Date.parse(esolatdate)
-    // offsetIndicator(new Date(Date.now() - timediff), currenttime, true)
+    document.getElementById("location").innerText = data.zone
+    document.getElementById(
+        "updateinfo"
+    ).innerText = `Dikemas kini: ${data.serverTime}`
+    document.getElementById("tarikhhijrah").innerText = data.prayerTime[0].hijri
     offsetIndicator(new Date(), currenttime, true)
     window.scrollTo(0, offset + 40 - window.innerHeight / 2)
 
     for (let waktu in waktusolat) {
         let value = waktusolat[waktu]
-        let indicator = document.createElement('div')
-        let display = document.createElement('span')
+        let indicator = document.createElement("div")
+        let display = document.createElement("span")
         let solattime = `23 Oct 1994 ${value}:00`
 
-        indicator.className = 's indicator'
+        indicator.className = "s indicator"
         indicator.id = waktu
-        display.className = 'display waktusolat'
+        display.className = "display waktusolat"
         display.innerText = value
 
         indicator.appendChild(display)
@@ -73,47 +61,61 @@ const generateIndicators = (data) => {
     }
 
     window.setInterval(() => {
-        // offsetIndicator(new Date(Date.now() - timediff), currenttime, true)
         offsetIndicator(new Date(), currenttime, true)
-    }, 1000);
+    }, 1000)
 
-    document.getElementById('overlay').style.display = 'none'
-    document.getElementsByClassName('spinner')[0].style.display = 'none'
+    document.getElementById("overlay").style.display = "none"
+    document.getElementsByClassName("spinner")[0].style.display = "none"
 }
 
-let currenttime = document.getElementById('currenttime')
+let currenttime = document.getElementById("currenttime")
 
 for (let i = 0; i < 24; i++) {
-    let dv = document.createElement('div')
-    let senggat = document.createElement('div')
-    let senggatpendek1 = document.createElement('div')
-    let senggatpendek2 = document.createElement('div')
-    let sp = document.createElement('span')
+    let dv = document.createElement("div")
+    let senggat = document.createElement("div")
+    let senggatpendek1 = document.createElement("div")
+    let senggatpendek2 = document.createElement("div")
+    let sp = document.createElement("span")
 
-    sp.innerText = `${i > 9 ? '' : 0}${i}:00`
+    sp.innerText = `${i > 9 ? "" : 0}${i}:00`
     dv.appendChild(sp)
-    senggat.style.width = '30px'
-    senggatpendek1.style.width = '15px'
-    senggatpendek2.style.width = '15px'
+    senggat.style.width = "30px"
+    senggatpendek1.style.width = "15px"
+    senggatpendek2.style.width = "15px"
     timeline.appendChild(dv)
     timeline.appendChild(senggatpendek1)
     timeline.appendChild(senggat)
     timeline.appendChild(senggatpendek2)
 }
 
-let offset = 0
-const offsetIndicator = (time, indicator, includesec) => {
-    let sec = time.getSeconds() + time.getMinutes() * 60 + time.getHours() * 60 * 60
-    offset = Math.floor(sec / 86400 * 2400)
-    indicator.style.top = `${offset + 40}px`
-    let timestring = `${time}`.substr(16, includesec ? 8 : 5)
-    indicator.children[0].innerText = `${includesec ? '' : `${indicator.id} `}${timestring}`
+if (window.location.search) {
+    const proxyurl = "https://cors-anywhere.herokuapp.com/"
+    const url = `https://www.e-solat.gov.my/index.php?r=esolatApi/TakwimSolat&period=today&${window.location.search.slice(1)}`
+    fetch(proxyurl + url)
+        .then((response) => response.text())
+        .then((contents) => generateIndicators(JSON.parse(contents)))
+        .catch(console.log)
+} else {
+    document.body.style.overflow = "hidden"
+    document.getElementsByClassName("spinner")[0].style.display = "none"
 }
 
-document.getElementById('location').addEventListener('click', () => {
-    let overlay = document.getElementById('overlay')
-    overlay.style.display = overlay.style.display ? '' : 'none'
-    document.body.style.overflow = overlay.style.display ? '' : 'hidden'
+let offset = 0
+const offsetIndicator = (time, indicator, includesec) => {
+    let sec =
+        time.getSeconds() + time.getMinutes() * 60 + time.getHours() * 60 * 60
+    offset = Math.floor((sec / 86400) * 2400)
+    indicator.style.top = `${offset + 40}px`
+    let timestring = `${time}`.substr(16, includesec ? 8 : 5)
+    indicator.children[0].innerText = `${
+        includesec ? "" : `${indicator.id} `
+    }${timestring}`
+}
+
+document.getElementById("location").addEventListener("click", () => {
+    let overlay = document.getElementById("overlay")
+    overlay.style.display = overlay.style.display ? "" : "none"
+    document.body.style.overflow = overlay.style.display ? "" : "hidden"
 })
 
 // Untuk cuba
