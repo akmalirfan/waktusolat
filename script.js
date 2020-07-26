@@ -1,29 +1,3 @@
-const sanitizeWaktuSolat = (waktusolat) => {
-    let ws = {}
-    let matches = []
-    let prevTime
-    let date1
-    let date2
-
-    for (let waktu in waktusolat) {
-        matches = waktusolat[waktu].match(/(\w+)\W(\w+)/)
-        ws[waktu] = `${matches[1]}:${matches[2]}`
-
-        if (prevTime) {
-            date1 = new Date(`23 Oct 1994 ${ws[prevTime]}:00`)
-            date2 = new Date(`23 Oct 1994 ${ws[waktu]}:00`)
-
-            if (date1 > date2) {
-                ws[waktu] = `${Number(matches[1]) + 12}:${matches[2]}`
-            }
-        }
-
-        prevTime = waktu
-    }
-
-    return ws
-}
-
 const generateIndicators = (data) => {
     let waktusolat = {
         Subuh: data.prayerTime[0].fajr,
@@ -33,7 +7,6 @@ const generateIndicators = (data) => {
         Maghrib: data.prayerTime[0].maghrib,
         Isyak: data.prayerTime[0].isha,
     }
-    waktusolat = sanitizeWaktuSolat(waktusolat)
     let timeline = document.getElementById("timeline")
 
     document.getElementById("location").innerText = data.zone
@@ -48,7 +21,7 @@ const generateIndicators = (data) => {
         let value = waktusolat[waktu]
         let indicator = document.createElement("div")
         let display = document.createElement("span")
-        let solattime = `23 Oct 1994 ${value}:00`
+        let solattime = `23 Oct 1994 ${value}`
 
         indicator.className = "s indicator"
         indicator.id = waktu
@@ -102,8 +75,7 @@ if (window.location.search) {
 
 let offset = 0
 const offsetIndicator = (time, indicator, includesec) => {
-    let sec =
-        time.getSeconds() + time.getMinutes() * 60 + time.getHours() * 60 * 60
+    let sec = time.getSeconds() + time.getMinutes() * 60 + time.getHours() * 60 * 60
     offset = Math.floor((sec / 86400) * 2400)
     indicator.style.top = `${offset + 40}px`
     let timestring = `${time}`.substr(16, includesec ? 8 : 5)
