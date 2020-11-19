@@ -1,0 +1,23 @@
+{
+  "name": "waktusolat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "start": "http-server .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafiazman/waktusolat.git"
+  },
+  "author": "Akmal Irfan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rafiazman/waktusolat/issues"
+  },
+  "homepage": "https://github.com/rafiazman/waktusolat#readme",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  }
+}
