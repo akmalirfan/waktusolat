@@ -62,9 +62,8 @@ for (let i = 0; i < 24; i++) {
 }
 
 if (window.location.search) {
-    const proxyurl = "https://cors-anywhere.herokuapp.com/"
     const url = `https://www.e-solat.gov.my/index.php?r=esolatApi/TakwimSolat&period=today&${window.location.search.slice(1)}`
-    fetch(proxyurl + url)
+    fetch(url)
         .then((response) => response.text())
         .then((contents) => generateIndicators(JSON.parse(contents)))
         .catch(console.log)
